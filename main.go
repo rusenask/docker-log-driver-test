@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -43,11 +44,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	h := sdk.NewHandler(`{"Implements": ["LoggingDriver"]}`)
+	h := sdk.NewHandler(`{"Implements": ["LogDriver"]}`)
 	handlers(&h, newDriver())
-	if err := h.ServeUnix("logs-plugin", 0); err != nil {
-		panic(err)
+
+	// Create an HTTP listener on port 4444
+	listener, err := net.Listen("tcp", ":4444")
+	if err != nil {
+		logrus.Fatal(err)
 	}
+
+	fmt.Println("Serving on port 4444")
+
+	err = h.Serve(listener)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		os.Exit(1)
+	}
+	// if err := h.ServeUnix("logs-plugin", 0); err != nil {
+	// 	panic(err)
+	// }
 }
 
 type StartLoggingRequest struct {
@@ -82,6 +97,8 @@ func handlers(h *sdk.Handler, d *driver) {
 			return
 		}
 
+		fmt.Println("StartLogging")
+
 		err := d.StartLogging(req.File, req.Info)
 		respond(err, w)
 	})
@@ -92,6 +109,9 @@ func handlers(h *sdk.Handler, d *driver) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		fmt.Println("StopLogging")
+
 		err := d.StopLogging(req.File)
 		respond(err, w)
 	})
@@ -108,6 +128,8 @@ func handlers(h *sdk.Handler, d *driver) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		fmt.Println("ReadLogs")
 
 		stream, err := d.ReadLogs(req.Info, req.Config)
 		if err != nil {

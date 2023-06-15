@@ -10,7 +10,7 @@ RUN go env
 
 ARG LDFLAGS
 
-RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg/mod GOOS=linux CGO_ENABLED=0 go build -ldflags "${LDFLAGS}" -o /usr/bin/docker-log-driver /go/src
+RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg/mod GOOS=linux CGO_ENABLED=0 go build -mod vendor -ldflags "${LDFLAGS}" -o /usr/bin/docker-log-driver /go/src
 
 FROM alpine:3.17.2
 RUN apk --no-cache add ca-certificates curl
