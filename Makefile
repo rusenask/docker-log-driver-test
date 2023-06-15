@@ -6,6 +6,6 @@ build:
 	docker build -t logs-plugin .
 
 run: build
-	docker run --rm --network host --name logs-plugin -v /run/docker/plugins/:/run/docker/plugins/ -v /run/docker/logging:/run/docker/logging logs-plugin
+	docker run --rm --name logs-plugin -v /run/docker/plugins/:/run/docker/plugins/ -v /run/docker/logging:/run/docker/logging logs-plugin
 
 # curl -H "Content-Type: application/json" -XPOST -d '{}' --unix-socket /run/docker/plugins/logs-plugin.sock http:/localhost/LogDriver.Capabilities
