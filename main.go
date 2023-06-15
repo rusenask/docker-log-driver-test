@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -47,22 +46,9 @@ func main() {
 	h := sdk.NewHandler(`{"Implements": ["LogDriver"]}`)
 	handlers(&h, newDriver())
 
-	// Create an HTTP listener on port 4444
-	listener, err := net.Listen("tcp", ":4444")
-	if err != nil {
-		logrus.Fatal(err)
+	if err := h.ServeUnix("lp1", 0); err != nil {
+		panic(err)
 	}
-
-	fmt.Println("Serving on port 4444")
-
-	err = h.Serve(listener)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(1)
-	}
-	// if err := h.ServeUnix("logs-plugin", 0); err != nil {
-	// 	panic(err)
-	// }
 }
 
 type StartLoggingRequest struct {
